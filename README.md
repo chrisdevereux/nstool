@@ -1,6 +1,7 @@
 nstool
 ======
 
+<<<<<<< HEAD
 Outputs content for a header file defining macros that alias class, symbol and
 protocol names.
 
@@ -14,3 +15,6 @@ Arguments:
     not be aliased (eg. NS and UI).
 
 Inspired by a similar tool in NimbusKit.
+=======
+Generates a header file of prefix macros suitable for namespacing an objective-c library
+>>>>>>> 62acd9e74aa72dd8cefaf6c267f2a3f34d830795

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .DS_Store
 build/
 *.pbxuser
@@ -17,3 +18,23 @@ DerivedData
 .idea/
 *.sqlite
 *.momd
+=======
+*.gem
+*.rbc
+.bundle
+.config
+coverage
+InstalledFiles
+lib/bundler/man
+pkg
+rdoc
+spec/reports
+test/tmp
+test/version_tmp
+tmp
+
+# YARD artifacts
+.yardoc
+_yardoc
+doc/
+>>>>>>> 62acd9e74aa72dd8cefaf6c267f2a3f34d830795
