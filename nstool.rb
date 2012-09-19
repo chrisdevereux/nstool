@@ -55,29 +55,21 @@ symbols.reject!{|x|
 	x.match(/_objc_|_OBJC_IVAR_|\[/)
 }
 
-# get the identifiers
+# get the identifiers, trimming the namespace suffix if present
 identifiers = symbols.map{|x|
 	x.match(/_(\w+)$/)
 }.reject{|x| 
 	x == nil
 }.map{|x|
-	x[1]
+	x[1].sub(/#{namespace_suffix}$/, "")
 }
 
-# filter prefixes
+# filter out any identifiers with prefixes passed as arguments
 filtered = identifiers.reject{|x|
 	filter_prefixes.any?{|y| x.match(/^#{y}/) }
 }
 
-# spit out the file
-
-puts "#ifdef #{namespace_suffix}"
-puts ""
-
+# spit out the macros
 filtered.uniq.each{|x|
 	puts "#define #{x} #{x}###{namespace_suffix}"
 }
-
-puts ""
-puts "#endif //#{namespace_suffix}"
-puts ""
