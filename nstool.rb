@@ -23,14 +23,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-if ARGV.count < 2 then
-	$stderr.puts "Usage: nstool [library-path] [namespace-suffix] <[filtered-prefixes] ...>"
-	exit
-end
-
-library_path, namespace_suffix = ARGV
-filter_prefixes = ARGV[2..-1] ||= []
-
+###########
+# nstool.rb
+###########
 
 # Outputs content for a header file defining macros that alias class, symbol and
 # protocol names.
@@ -38,7 +33,7 @@ filter_prefixes = ARGV[2..-1] ||= []
 # This allows an objective-c library to be embedded privately in other libraries
 # without causing a name collision if a library user also links to that library.
 
-# Arguments: 
+# Commandline arguments: 
 # * library-path: Path to a .dylib or .a library 
 # * namespace-suffix: String appended to all symbol names. 
 # * filtered-prefixes: Optional list of prefixes to classes and functions that should
@@ -47,29 +42,49 @@ filter_prefixes = ARGV[2..-1] ||= []
 # Inspired by a similar feature in NimbusKit.
 
 
-# get all exported symbols
-symbols = `nm #{library_path}`.grep(/\w+ (S|T|C|A|D|I)/)
+def namespace_defines(library_path, namespace_suffix, filter_prefixes = [])
+	# get all exported symbols
+	symbols = `nm #{library_path}`.grep(/\w+ (S|T|C|A|D|I)/)
 
-# Remove methods and any compiler-generated runtime support
-symbols.reject!{|x| 
-	x.match(/_objc_|_OBJC_IVAR_|\[/)
-}
+	# Remove methods and any compiler-generated runtime support
+	symbols.reject!{|x| 
+		x.match(/_objc_|_OBJC_IVAR_|\[/)
+	}
 
-# get the identifiers, trimming the namespace suffix if present
-identifiers = symbols.map{|x|
-	x.match(/_(\w+)$/)
-}.reject{|x| 
-	x == nil
-}.map{|x|
-	x[1].sub(/#{namespace_suffix}$/, "")
-}
+	# get the identifiers, trimming the namespace suffix if present
+	identifiers = symbols.map{|x|
+		x.match(/_(\w+)$/)
+	}.reject{|x| 
+		x == nil
+	}.map{|x|
+		x[1].sub(/#{namespace_suffix}$/, "")
+	}
 
-# filter out any identifiers with prefixes passed as arguments
-filtered = identifiers.reject{|x|
-	filter_prefixes.any?{|y| x.match(/^#{y}/) }
-}
+	# filter out any identifiers with prefixes passed as arguments
+	filtered = identifiers.reject{|x|
+		filter_prefixes.any?{|y| x.match(/^#{y}/) }
+	}.uniq
 
-# spit out the macros
-filtered.uniq.each{|x|
-	puts "#define #{x} #{x}###{namespace_suffix}"
-}
+	if block_given? then
+		filtered.each{|x|
+			yield("#define #{x} #{x}###{namespace_suffix}") 
+		}
+	else
+		return filtered
+	end
+end
+
+
+if $0 == $FILENAME then
+	if ARGV.count < 2 then
+		$stderr.puts "Usage: nstool [library-path] [namespace-suffix] <[filtered-prefixes] ...>"
+		exit
+	end
+
+	library_path, namespace_suffix = ARGV
+	filter_prefixes = ARGV[2..-1] ||= []
+
+	namespace_defines(library_path, namespace_suffix, filter_prefixes){|x|
+		puts x
+	}
+end
