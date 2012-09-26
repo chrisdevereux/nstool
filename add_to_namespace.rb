@@ -38,15 +38,15 @@ require 'nstool'
 
 project_dir     = ENV["PROJECT_DIR"]
 binary          = File.join(ENV["BUILT_PRODUCTS_DIR"], ENV["FULL_PRODUCT_NAME"])
-namespace_def   = File.join(project_dir, "NAMESPACE")
+namespace_def   = File.join(project_dir, "namespace")
 target_header   = File.join(project_dir, ARGV[0])
 filter_prefixes = ARGV[2..-1] ||= []
 
 
 
 if !File.exists?(namespace_def) then
-	msg = "// Placeholder for namespace macros. Add a NAMESPACE file to the project root to enable.\n"
-	exit if File.read(target_header) == msg
+	msg = "// Placeholder for namespace macros. Add a namespace file to the project root to enable.\n"
+	exit if File.exists?(target_header) && File.read(target_header) == msg
 	File.open(target_header, 'w'){|f| f.write msg }
 	exit
 end
