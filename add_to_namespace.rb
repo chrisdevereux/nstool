@@ -45,9 +45,9 @@ filter_prefixes = ARGV[2..-1] ||= []
 
 
 if !File.exists?(namespace_def) then
-	File.open(target_header, 'w'){|f|
-	    f.puts "// Placeholder for namespace macros. Add a NAMESPACE file to the project root to enable."
-	}
+	msg = "// Placeholder for namespace macros. Add a NAMESPACE file to the project root to enable.\n"
+	exit if File.read(target_header) == msg
+	File.open(target_header, 'w'){|f| f.write msg }
 	exit
 end
 
